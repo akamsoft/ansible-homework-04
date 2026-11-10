@@ -1,0 +1,51 @@
+---
+- name: Install and configure ClickHouse
+  hosts: clickhouse
+  become: true
+  roles:
+    - clickhouse
+
+  post_tasks:
+    - name: Remove legacy listen.xml (conflicts with role-generated config)
+      ansible.builtin.file:
+        path: /etc/clickhouse-server/config.d/listen.xml
+        state: absent
+      notify: Restart ClickHouse
+
+    - name: Allow default ClickHouse user to connect from any IP (for LightHouse)
+      ansible.builtin.copy:
+        dest: /etc/clickhouse-server/users.d/zz-default-network.xml
+        content: |
+          <clickhouse>
+              <users>
+                  <default>
+                      <networks replace="replace">
+                          <ip>::/0</ip>
+                      </networks>
+                  </default>
+              </users>
+          </clickhouse>
+        owner: clickhouse
+        group: clickhouse
+        mode: '0640'
+      notify: Restart ClickHouse
+
+  handlers:
+    - name: Restart ClickHouse
+      ansible.builtin.service:
+        name: clickhouse-server
+        state: restarted
+
+- name: Install and configure Vector
+  hosts: vector
+  become: true
+  roles:
+    - role: vector-role
+      tags: vector
+
+- name: Install and configure LightHouse
+  hosts: lighthouse
+  become: true
+  roles:
+    - role: lighthouse-role
+      tags: lighthouse
