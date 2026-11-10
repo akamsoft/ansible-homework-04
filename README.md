@@ -1,10 +1,5 @@
 # Домашнее задание к занятию 4 «Работа с roles»
 
-**Репозиторий:** https://github.com/akamsoft/ansible-homework-04
-**Тег:** [08-ansible-04-role](https://github.com/akamsoft/ansible-homework-04/releases/tag/08-ansible-04-role)
-
----
-
 ## 📖 О чём этот playbook
 
 Playbook автоматизирует установку и настройку трёх сервисов на серверах под управлением **Rocky Linux 9** в Yandex Cloud. В отличие от ДЗ №3, вся логика вынесена в **переиспользуемые роли** — playbook стал тонким: в `site.yml` только вызовы ролей, а вся реализация лежит в отдельных репозиториях (для `vector-role` и `lighthouse-role`) или в сторонней роли из Galaxy (`clickhouse`).
@@ -30,9 +25,9 @@ Playbook автоматизирует установку и настройку �
 
 | Хост | Группа | Роль | Публичный IP |
 |---|---|---|---|
-| `clickhouse-01` | `clickhouse` | ClickHouse | `<IP_CLICKHOUSE>` |
-| `vector-01` | `vector` | Vector | `<IP_VECTOR>` |
-| `lighthouse-01` | `lighthouse` | LightHouse (Nginx) | `<IP_LIGHTHOUSE>` |
+| `clickhouse-01` | `clickhouse` | ClickHouse | `51.250.94.235` |
+| `vector-01` | `vector` | Vector | `51.250.3.88` |
+| `lighthouse-01` | `lighthouse` | LightHouse (Nginx) | `51.250.72.39` |
 
 - Доступ по SSH с ключом `~/.ssh/id_ed25519`, пользователь `alex`.
 - Коллекция `ansible.posix` установлена (`ansible-galaxy collection install ansible.posix`) — нужна для `seboolean`.
@@ -79,21 +74,24 @@ all:
     clickhouse:
       hosts:
         clickhouse-01:
-          ansible_host: <IP_CLICKHOUSE>
+          ansible_host: 51.250.94.235
           ansible_user: alex
           ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+          ansible_python_interpreter: /usr/bin/python3
     vector:
       hosts:
         vector-01:
-          ansible_host: <IP_VECTOR>
+          ansible_host: 51.250.3.88
           ansible_user: alex
           ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+          ansible_python_interpreter: /usr/bin/python3
     lighthouse:
       hosts:
         lighthouse-01:
-          ansible_host: <IP_LIGHTHOUSE>
+          ansible_host: 51.250.72.39
           ansible_user: alex
           ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+          ansible_python_interpreter: /usr/bin/python3
 ```
 
 ---
@@ -251,15 +249,15 @@ ansible-playbook -i inventory/prod.yml site.yml
 
 ```bash
 # ClickHouse
-ssh alex@<IP_CLICKHOUSE> "sudo ss -tlnp | grep 8123; clickhouse-client -q 'SHOW DATABASES'"
+ssh alex@51.250.94.235 "sudo ss -tlnp | grep 8123; clickhouse-client -q 'SHOW DATABASES'"
 
 # Vector
-ssh alex@<IP_VECTOR> "sudo systemctl status vector --no-pager | head -5; vector validate /etc/vector/vector.yaml"
+ssh alex@51.250.3.88 "sudo systemctl status vector --no-pager | head -5; vector validate /etc/vector/vector.yaml"
 
 # LightHouse
-ssh alex@<IP_LIGHTHOUSE> "sudo systemctl status nginx --no-pager | head -5"
-curl -s http://<IP_LIGHTHOUSE>/ | grep -i "<title>"
-curl -s "http://<IP_LIGHTHOUSE>/clickhouse/?query=SELECT%20version()"
+ssh alex@51.250.72.39 "sudo systemctl status nginx --no-pager | head -5"
+curl -s http://51.250.72.39/ | grep -i "<title>"
+curl -s "http://51.250.72.39/clickhouse/?query=SELECT%20version()"
 ```
 
 ---
@@ -468,7 +466,7 @@ exclude_paths:
 `httpd_can_network_connect` по умолчанию `off`. Без его включения nginx не может проксировать к ClickHouse и отдаёт `502 Bad Gateway` с записью в `/var/log/nginx/error.log`:
 
 ```
-connect() to <IP_CLICKHOUSE>:8123 failed (13: Permission denied) while connecting to upstream
+connect() to 51.250.94.235:8123 failed (13: Permission denied) while connecting to upstream
 ```
 
 Задача `ansible.posix.seboolean` закреплена в `lighthouse-role`.
@@ -515,11 +513,7 @@ vector_bin: "{{ vector_install_dir }}/vector-x86_64-unknown-linux-gnu/bin/vector
 
 ---
 
-## 📤 Ссылка на решение
-
 - **Репозиторий:** https://github.com/akamsoft/ansible-homework-04
-- **Тег:** https://github.com/akamsoft/ansible-homework-04/releases/tag/08-ansible-04-role
-- **README:** https://github.com/akamsoft/ansible-homework-04/blob/main/README.md
 
 ### Репозитории ролей
 
@@ -528,22 +522,3 @@ vector_bin: "{{ vector_install_dir }}/vector-x86_64-unknown-linux-gnu/bin/vector
 - **clickhouse:** https://github.com/AlexeySetevoi/ansible-clickhouse (v1.13, из Galaxy)
 
 ---
-
-## ✅ Что закрыто по заданию
-
-| Пункт задания | Статус |
-|---|---|
-| Три публичных репозитория (`ansible-homework-04`, `vector-role`, `lighthouse-role`) | ✅ |
-| `requirements.yml` с ролью `AlexeySetevoi/ansible-clickhouse` v1.13 | ✅ |
-| Роль ClickHouse скачана через `ansible-galaxy role install` | ✅ |
-| `vector-role` создана через `ansible-galaxy role init`, наполнена | ✅ |
-| Переменные разнесены между `vars` (`vector_packages`, `vector_service_name`) и `defaults` (`vector_version`, `vector_install_dir`, `vector_bin`) | ✅ |
-| Шаблоны перенесены в `templates/vector.yml.j2`, `templates/vector.service.j2` | ✅ |
-| `lighthouse-role` создана и наполнена (`tasks`, `handlers`, `defaults`, `vars`, `templates`) | ✅ |
-| `site.yml` использует роли через `roles:` | ✅ |
-| `ansible-lint site.yml` — 0 ошибок (сторонняя роль исключена) | ✅ |
-| `--check` — план корректен, без изменений | ✅ |
-| `--diff` — изменения применяются | ✅ |
-| Повторный `--diff` — `changed=0` для всех трёх хостов (идемпотентность) | ✅ |
-| README с описанием playbook, параметров, тегов, скриншотами | ✅ |
-| Тег `08-ansible-04-role` на фиксирующий коммит | ✅ |
