@@ -23,6 +23,8 @@ Playbook автоматизирует установку и настройку �
 - **Control node:** Debian 13, Ansible установлен через `sudo apt install ansible` (`ansible-core` 2.19+).
 - **Managed hosts:** три VM в Yandex Cloud на Rocky Linux 9:
 
+![Alt text](images/VM.jpg)
+
 | Хост | Группа | Роль | Публичный IP |
 |---|---|---|---|
 | `clickhouse-01` | `clickhouse` | ClickHouse | `51.250.94.235` |
@@ -93,6 +95,10 @@ all:
           ansible_ssh_private_key_file: ~/.ssh/id_ed25519
           ansible_python_interpreter: /usr/bin/python3
 ```
+
+![Alt text](images/1.jpg)
+
+![Alt text](images/3.jpg)
 
 ---
 
