@@ -1,0 +1,8 @@
+---
+profile: production
+
+# Роль clickhouse — сторонняя (AlexeySetevoi/ansible-clickhouse), тянется из
+# requirements.yml. Её стиль (FQCN, meta, mode) не наша зона ответственности.
+# Мы отвечаем за site.yml и за собственные роли vector-role/lighthouse-role.
+exclude_paths:
+  - roles/clickhouse/

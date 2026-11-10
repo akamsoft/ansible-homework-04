@@ -1,0 +1,3 @@
+---
+clickhouse_host: "{{ hostvars[groups['clickhouse'][0]]['ansible_host'] }}"
+clickhouse_port: 8123

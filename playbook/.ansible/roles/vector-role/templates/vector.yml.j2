@@ -1,0 +1,33 @@
+data_dir: /var/lib/vector
+
+sources:
+  host_metrics:
+    type: host_metrics
+    collectors:
+      - cpu
+      - disk
+      - memory
+      - network
+  syslog:
+    type: file
+    include:
+      - /var/log/messages
+      - /var/log/secure
+
+transforms:
+  parse_syslog:
+    type: remap
+    inputs:
+      - syslog
+    source: |
+      . = parse_syslog!(.message)
+
+sinks:
+  console:
+    type: console
+    inputs:
+      - parse_syslog
+      - host_metrics
+    encoding:
+      codec: json
+

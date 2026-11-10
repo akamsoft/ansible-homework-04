@@ -1,0 +1,6 @@
+.vault_pass
+*.retry
+*.log
+playbook/roles/clickhouse/
+playbook/roles/vector-role/
+playbook/roles/lighthouse-role/

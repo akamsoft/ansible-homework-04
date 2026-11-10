@@ -1,0 +1,9 @@
+---
+clickhouse_version: "24.8.5.115"
+clickhouse_repo: "https://packages.clickhouse.com/rpm/lts/"
+clickhouse_repo_key: "https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key"
+
+# Список, НЕ строка! Шаблон роли итерирует по нему:
+# строка "0.0.0.0" → посимвольно (0, ., 0, ...), список → одна строка <listen_host>0.0.0.0</listen_host>.
+clickhouse_listen_host:
+  - "0.0.0.0"

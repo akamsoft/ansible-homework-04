@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: Alex
+  description: Install and configure Vector
+  license: MIT
+  min_ansible_version: "2.10"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+  galaxy_tags:
+    - vector
+    - logging
+dependencies: []

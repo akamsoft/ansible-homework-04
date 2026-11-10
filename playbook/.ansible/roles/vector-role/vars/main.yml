@@ -1,0 +1,5 @@
+---
+vector_packages:
+  - tar
+  - gzip
+vector_service_name: "vector"
